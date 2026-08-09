@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM2 Sunucu Joiner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+        .container {
+            background: #16213e;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #e94560;
+        }
+        p {
+            margin-bottom: 20px;
+            color: #aaa;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        input::placeholder {
+            color: #666;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #e94560;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #c73652;
+            transform: scale(1.02);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #888;
+        }
+        .info span {
+            color: #e94560;
+            font-weight: bold;
+        }
+        #status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #4fc3f7;
+            display: none;
+        }
+        .jobid-display {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            color: #4fc3f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 MM2 Sunucu Joiner</h1>
+        <p>JobID'yi yapıştır ve <span>GİR</span> butonuna tıkla</p>
+
+        <input type="text" id="jobIdInput" placeholder="Örn: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        
+        <button class="btn" onclick="joinServer()">🚀 SUNUCUYA GİR</button>
+
+        <div id="status">✅ Bağlanılıyor...</div>
+
+        <div class="info">
+            ⚡ Roblox otomatik olarak açılacak.<br>
+            JobID: <span id="displayJobId">-</span>
+        </div>
+        <div class="jobid-display" id="jobIdDisplay">-</div>
+    </div>
+
+    <script>
+        function joinServer() {
+            const input = document.getElementById('jobIdInput');
+            const status = document.getElementById('status');
+            const display = document.getElementById('displayJobId');
+            const jobIdDisplay = document.getElementById('jobIdDisplay');
+            let jobId = input.value.trim();
+
+            if (!jobId) {
+                alert('Lütfen geçerli bir JobID girin!');
+                return;
+            }
+
+            // JobID formatını kontrol et (basit)
+            if (!jobId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+                alert('Geçersiz JobID formatı! Örn: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+                return;
+            }
+
+            display.textContent = jobId;
+            jobIdDisplay.textContent = jobId;
+            status.style.display = 'block';
+            status.textContent = '🔄 Roblox açılıyor... Sunucuya bağlanılıyor...';
+
+            // Roblox join linki
+            const joinUrl = 'https://www.roblox.com/games/142823291?join=' + jobId;
+
+            // Yeni sekmede aç
+            window.open(joinUrl, '_blank');
+
+            status.textContent = '✅ Roblox açıldı! Oyun yükleniyor...';
+            setTimeout(() => {
+                status.textContent = '✅ Sunucuya bağlanıldı! (Roblox açık değilse manuel aç)';
+            }, 5000);
+        }
+
+        // Enter tuşu ile gönderme
+        document.getElementById('jobIdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinServer();
+            }
+        });
+
+        // URL'den JobID parametresini otomatik al
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobIdParam = urlParams.get('jobid');
+        if (jobIdParam) {
+            document.getElementById('jobIdInput').value = jobIdParam;
+            document.getElementById('displayJobId').textContent = jobIdParam;
+            document.getElementById('jobIdDisplay').textContent = jobIdParam;
+            // Otomatik join yap (opsiyonel)
+            // joinServer();
+        }
+    </script>
+</body>
+</html>
