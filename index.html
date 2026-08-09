@@ -1,152 +1,134 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MM2 Joiner</title>
+    <title>Kdml Joiner</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body {
-            background: #0d0d1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #fff;
+        body { 
+            background: #000; 
+            color: #8224d4; 
+            font-family: sans-serif; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            flex-direction: column; 
+            margin: 0;
         }
-        .container {
-            background: #1a1a2e;
-            padding: 50px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 450px;
-            width: 100%;
-            box-shadow: 0 0 50px rgba(233, 69, 96, 0.15);
+        .loader { 
+            border: 4px solid #1a1a1a; 
+            border-top: 4px solid #8224d4; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            animation: spin 1s linear infinite; 
         }
-        h1 { font-size: 32px; color: #e94560; margin-bottom: 8px; }
-        .sub { color: #888; font-size: 14px; margin-bottom: 25px; }
-        .jobid-box {
-            background: #0f3460;
-            padding: 12px;
-            border-radius: 10px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #4fc3f7;
-            word-break: break-all;
-            margin-bottom: 25px;
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
         }
         .btn {
-            width: 100%;
-            padding: 16px;
+            padding: 15px 40px;
+            background: #8224d4;
+            color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             font-size: 18px;
-            font-weight: bold;
             cursor: pointer;
+            margin-top: 20px;
             transition: 0.3s;
-            margin-bottom: 12px;
         }
-        .btn-primary {
-            background: #e94560;
-            color: #fff;
+        .btn:hover {
+            background: #6a1ca8;
+            transform: scale(1.05);
         }
-        .btn-primary:hover {
-            background: #c73652;
-            transform: scale(1.02);
-        }
-        .btn-secondary {
-            background: #0f3460;
-            color: #4fc3f7;
-        }
-        .btn-secondary:hover {
-            background: #1a4a7a;
+        .info {
+            color: #555;
+            font-size: 14px;
+            margin-top: 10px;
+            word-break: break-all;
+            text-align: center;
+            max-width: 400px;
         }
         .status {
-            padding: 10px;
-            border-radius: 8px;
-            background: #0f3460;
             color: #4fc3f7;
-            margin-top: 15px;
+            margin-top: 10px;
             font-size: 14px;
         }
-        .footer { margin-top: 20px; font-size: 12px; color: #444; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎯 MM2 Joiner</h1>
-        <p class="sub">Sunucuya bağlanmak için tıkla</p>
-
-        <div class="jobid-box" id="jobidDisplay">JobID: -</div>
-
-        <button class="btn btn-primary" onclick="openRoblox()">🚀 ROBLOX'U AÇ</button>
-        <button class="btn btn-secondary" onclick="openRobloxFallback()">⬅️ Roblox açılmıyorsa tıkla</button>
-
-        <div class="status" id="status">⏳ Hazır</div>
-        <div class="footer">Private Joiner v3.0</div>
-    </div>
+    <div class="loader" id="loader"></div>
+    <h2 id="msg">Starting Roblox...</h2>
+    <div class="info" id="jobidInfo">JobID: -</div>
+    <div class="status" id="statusMsg">⏳ Bağlanılıyor...</div>
 
     <script>
-        let currentJobId = '';
-
-        function getJobId() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const jobId = urlParams.get('jobid');
-            if (jobId) {
-                currentJobId = jobId;
-                document.getElementById('jobidDisplay').textContent = 'JobID: ' + jobId;
-                document.getElementById('status').textContent = '✅ JobID alındı, sunucuya bağlanmaya hazır';
-                return jobId;
-            } else {
-                document.getElementById('status').textContent = '❌ HATA: JobID bulunamadı!';
-                return null;
-            }
-        }
-
-        function openRoblox() {
-            const jobId = getJobId();
-            if (!jobId) return;
-
-            const status = document.getElementById('status');
-            status.textContent = '🔄 Roblox açılıyor...';
-
-            // YÖNTEM 1: roblox:// protokolü
-            const robloxProtocol = 'roblox://placeId=142823291&joinId=' + jobId;
-
-            try {
-                window.location.href = robloxProtocol;
-                status.textContent = '✅ Roblox açıldı! (Eğer açılmadıysa alttaki butonu dene)';
-            } catch (e) {
-                status.textContent = '⚠️ Roblox açılamadı, alternatif yöntem deneniyor...';
-                openRobloxFallback();
-            }
-        }
-
-        function openRobloxFallback() {
-            const jobId = getJobId();
-            if (!jobId) return;
-
-            const status = document.getElementById('status');
-            status.textContent = '🔄 Alternatif yöntem ile açılıyor...';
-
-            // YÖNTEM 2: Normal Roblox linki
-            const robloxUrl = 'https://www.roblox.com/games/142823291?join=' + jobId;
-
-            // Yeni sekmede aç
-            window.open(robloxUrl, '_blank');
-            status.textContent = '✅ Roblox yeni sekmede açıldı! (Eğer açılmadıysa linki manuel kopyala)';
-        }
-
-        // Sayfa yüklendiğinde otomatik dene (isteğe bağlı)
         window.onload = function() {
-            const jobId = getJobId();
-            if (jobId) {
-                // 1 saniye bekle, sonra otomatik dene
-                setTimeout(function() {
-                    // Sadece bilgi ver, kullanıcı butona tıklasın
-                    document.getElementById('status').textContent = '✅ Roblox'u açmak için butona tıkla';
-                }, 1000);
+            const params = new URLSearchParams(window.location.search);
+            const pid = params.get('pid') || '142823291';  // MM2 place ID sabit
+            const jid = params.get('jid');  // JobID
+
+            const statusMsg = document.getElementById('statusMsg');
+            const jobidInfo = document.getElementById('jobidInfo');
+
+            if (!jid) {
+                document.getElementById('msg').innerText = "❌ HATA: JobID (jid) parametresi eksik!";
+                document.getElementById('loader').style.display = 'none';
+                statusMsg.innerText = "❌ Linkte ?jid=XXXX eklenmeli";
+                return;
             }
+
+            jobidInfo.innerText = 'JobID: ' + jid;
+
+            // Roblox protokol linki (güncel format)
+            const protocolLink = "roblox://experiences/start?placeId=" + pid + "&gameInstanceId=" + jid;
+            // Eski format (yedek)
+            const protocolLinkOld = "roblox://placeId=" + pid + "&joinId=" + jid;
+            // Normal web linki (yedek)
+            const webLink = "https://www.roblox.com/games/" + pid + "?join=" + jid;
+
+            // Önce roblox:// dene
+            try {
+                window.location.href = protocolLink;
+                statusMsg.innerText = '✅ Roblox açılıyor...';
+                document.getElementById('msg').innerText = '✅ Roblox açılıyor...';
+                document.getElementById('loader').style.display = 'none';
+            } catch (e) {
+                statusMsg.innerText = '⚠️ Roblox protokolü çalışmadı, butona tıkla.';
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('msg').innerHTML = 
+                    '<button class="btn" onclick="openRoblox()">🎮 Roblox\'u Aç</button>' +
+                    '<br><br>' +
+                    '<button class="btn" style="background:#333;" onclick="openWeb()">🌐 Web\'den Aç (yedek)</button>';
+            }
+
+            // 3 saniye sonra hala açılmadıysa buton göster
+            setTimeout(function() {
+                if (document.getElementById('msg').innerText.includes('Roblox açılıyor')) {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('msg').innerHTML = 
+                        '<button class="btn" onclick="openRoblox()">🎮 Roblox\'u Aç</button>' +
+                        '<br><br>' +
+                        '<button class="btn" style="background:#333;" onclick="openWeb()">🌐 Web\'den Aç (yedek)</button>';
+                    statusMsg.innerText = '⏳ Roblox açılmadıysa butona tıkla';
+                }
+            }, 3000);
+
+            // Global fonksiyonlar (butonlar için)
+            window.openRoblox = function() {
+                try {
+                    window.location.href = protocolLink;
+                    statusMsg.innerText = '✅ Roblox açılıyor...';
+                } catch (e) {
+                    window.open(webLink, '_blank');
+                    statusMsg.innerText = '✅ Web linki yeni sekmede açıldı';
+                }
+            };
+
+            window.openWeb = function() {
+                window.open(webLink, '_blank');
+                statusMsg.innerText = '✅ Web linki yeni sekmede açıldı';
+            };
         };
     </script>
 </body>
