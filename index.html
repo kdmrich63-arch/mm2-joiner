@@ -1,134 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Kdml Joiner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDML</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: #000; 
-            color: #8224d4; 
-            font-family: sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            flex-direction: column; 
-            margin: 0;
+        :root {
+            --bg: #050505;
+            --primary: #8224d4;
+            --text: #ffffff;
+            --error: #ff4757;
         }
-        .loader { 
-            border: 4px solid #1a1a1a; 
-            border-top: 4px solid #8224d4; 
-            border-radius: 50%; 
-            width: 40px; 
-            height: 40px; 
-            animation: spin 1s linear infinite; 
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            /* Çok hafif bir arkada mor ışık */
+            background-image: radial-gradient(circle at 50% 50%, rgba(130, 36, 212, 0.1), transparent 60%);
         }
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
-        .btn {
-            padding: 15px 40px;
-            background: #8224d4;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-        .btn:hover {
-            background: #6a1ca8;
-            transform: scale(1.05);
-        }
-        .info {
-            color: #555;
-            font-size: 14px;
-            margin-top: 10px;
-            word-break: break-all;
+
+        .center-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            max-width: 400px;
+            animation: fadeIn 0.8s ease-out;
         }
-        .status {
-            color: #4fc3f7;
-            margin-top: 10px;
-            font-size: 14px;
+
+        .logo {
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(180deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* Yükleniyor çubuğu (KDML'nin altında ince bir çizgi) */
+        .loader-bar {
+            width: 0%;
+            height: 3px;
+            background: var(--primary);
+            margin-top: 20px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.3s ease;
+            animation: load 2s forwards cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+
+        /* Hata Mesajı Alanı */
+        .error-msg {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .error-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes load {
+            0% { width: 0%; opacity: 1; }
+            70% { width: 100%; opacity: 1; }
+            100% { width: 100%; opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <div class="loader" id="loader"></div>
-    <h2 id="msg">Starting Roblox...</h2>
-    <div class="info" id="jobidInfo">JobID: -</div>
-    <div class="status" id="statusMsg">⏳ Bağlanılıyor...</div>
+
+    <div class="center-box">
+        <!-- Sadece KDML -->
+        <h1 class="logo">KDML</h1>
+        
+        <!-- Yükleniyor Çubuğu -->
+        <div class="loader-bar" id="loaderBar"></div>
+        
+        <!-- Hata Mesajı -->
+        <div class="error-msg" id="errorMsg">Missing Job ID.</div>
+    </div>
 
     <script>
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
-            const pid = params.get('pid') || '142823291';  // MM2 place ID sabit
-            const jid = params.get('jid');  // JobID
+            const pid = params.get('pid') || '142823291';
+            const jid = params.get('jid');
+            const errorMsg = document.getElementById('errorMsg');
+            const loaderBar = document.getElementById('loaderBar');
 
-            const statusMsg = document.getElementById('statusMsg');
-            const jobidInfo = document.getElementById('jobidInfo');
-
-            if (!jid) {
-                document.getElementById('msg').innerText = "❌ HATA: JobID (jid) parametresi eksik!";
-                document.getElementById('loader').style.display = 'none';
-                statusMsg.innerText = "❌ Linkte ?jid=XXXX eklenmeli";
+            // Eğer JID yoksa
+            if (!jid || jid.trim() === "") {
+                // Animasyonu durdur
+                loaderBar.style.display = 'none';
+                // Hatayı göster
+                errorMsg.innerText = "Missing Job ID.";
+                errorMsg.classList.add('show');
                 return;
             }
 
-            jobidInfo.innerText = 'JobID: ' + jid;
+            const protocolLink = `roblox://experiences/start?placeId=${pid}&gameInstanceId=${jid}`;
+            const webLink = `https://www.roblox.com/games/${pid}?join=${jid}`;
 
-            // Roblox protokol linki (güncel format)
-            const protocolLink = "roblox://experiences/start?placeId=" + pid + "&gameInstanceId=" + jid;
-            // Eski format (yedek)
-            const protocolLinkOld = "roblox://placeId=" + pid + "&joinId=" + jid;
-            // Normal web linki (yedek)
-            const webLink = "https://www.roblox.com/games/" + pid + "?join=" + jid;
-
-            // Önce roblox:// dene
+            // Roblox'u açmayı dene
             try {
                 window.location.href = protocolLink;
-                statusMsg.innerText = '✅ Roblox açılıyor...';
-                document.getElementById('msg').innerText = '✅ Roblox açılıyor...';
-                document.getElementById('loader').style.display = 'none';
             } catch (e) {
-                statusMsg.innerText = '⚠️ Roblox protokolü çalışmadı, butona tıkla.';
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('msg').innerHTML = 
-                    '<button class="btn" onclick="openRoblox()">🎮 Roblox\'u Aç</button>' +
-                    '<br><br>' +
-                    '<button class="btn" style="background:#333;" onclick="openWeb()">🌐 Web\'den Aç (yedek)</button>';
+                // Protokol desteklenmiyorsa hata ver (Genelde tarayıcılar hata fırlatmaz ama)
             }
 
-            // 3 saniye sonra hala açılmadıysa buton göster
-            setTimeout(function() {
-                if (document.getElementById('msg').innerText.includes('Roblox açılıyor')) {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('msg').innerHTML = 
-                        '<button class="btn" onclick="openRoblox()">🎮 Roblox\'u Aç</button>' +
-                        '<br><br>' +
-                        '<button class="btn" style="background:#333;" onclick="openWeb()">🌐 Web\'den Aç (yedek)</button>';
-                    statusMsg.innerText = '⏳ Roblox açılmadıysa butona tıkla';
+            // 2 saniye sonra hala sayfadaysa (uygulama açılmadıysa) hatayı göster
+            setTimeout(() => {
+                if (document.visibilityState === 'visible') {
+                    loaderBar.style.display = 'none';
+                    errorMsg.innerText = "Failed to open Roblox. Please try again.";
+                    errorMsg.classList.add('show');
+                    
+                    // Otomatik web linkini açma, kullanıcıya bırak
                 }
-            }, 3000);
-
-            // Global fonksiyonlar (butonlar için)
-            window.openRoblox = function() {
-                try {
-                    window.location.href = protocolLink;
-                    statusMsg.innerText = '✅ Roblox açılıyor...';
-                } catch (e) {
-                    window.open(webLink, '_blank');
-                    statusMsg.innerText = '✅ Web linki yeni sekmede açıldı';
-                }
-            };
-
-            window.openWeb = function() {
-                window.open(webLink, '_blank');
-                statusMsg.innerText = '✅ Web linki yeni sekmede açıldı';
-            };
+            }, 2500);
         };
     </script>
 </body>
