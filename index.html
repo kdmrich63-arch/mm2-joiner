@@ -150,8 +150,8 @@
 
         <div id="loadingArea">
             <div class="status-container">
-                <div class="spinner"></div>
-                <div class="status-text">Connecting</div>
+                <div class="spinner" id="spinner"></div>
+                <div class="status-text" id="statusText">Connecting</div>
             </div>
             <div class="job-id" id="jobIdText"></div>
             <button class="btn" id="joinBtn" onclick="joinGame()">Open Roblox</button>
@@ -173,6 +173,8 @@
         const errorText = document.getElementById('errorText');
         const jobIdText = document.getElementById('jobIdText');
         const joinBtn = document.getElementById('joinBtn');
+        const spinner = document.getElementById('spinner');
+        const statusText = document.getElementById('statusText');
 
         const protocolLink = `roblox://experiences/start?placeId=${pid}&gameInstanceId=${jid}`;
         const webLink = `https://www.roblox.com/games/${pid}?join=${jid}`;
@@ -184,14 +186,16 @@
         }
 
         function joinGame() {
+            // Protokole yönlendir
             window.location.href = protocolLink;
+            
+            // Protokol açılmazsa 1.5 sn sonra web linkine düşür (sadece web tarayıcılarda)
             setTimeout(() => {
                 window.open(webLink, '_blank');
             }, 1500);
         }
 
         window.onload = function() {
-            // JobID kontrolü
             if (!jid || jid.trim() === "") {
                 showError("Missing JobID parameter.\nPlease use a valid link.");
                 return;
@@ -199,26 +203,32 @@
 
             jobIdText.innerText = `JobID: ${jid}`;
 
-            // Discord in-app browser kontrolü
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            const isDiscord = ua.indexOf("Discord") > -1;
-            
+            // ⭐ DISCORD İN-APP BROWSER KONTROLÜ ⭐
+            const ua = navigator.userAgent || "";
+            const isDiscord = ua.indexOf("Discord") > -1 || ua.indexOf("discord") > -1;
+
             if (isDiscord) {
-                showError("Discord tarayıcısı engellendi.\nLütfen linki kopyalayıp Chrome/Safari'ye yapıştırın.");
-                return;
-            }
-
-            // Otomatik açmayı dene
-            try {
-                window.location.href = protocolLink;
-
-                setTimeout(() => {
-                    if (document.visibilityState === 'visible') {
-                        joinBtn.style.display = 'block';
-                    }
-                }, 2000);
-            } catch (e) {
+                // Discord içinden açıldıysa: otomatik yönlendirme YAPMA, beyaz ekranı engelle
+                spinner.style.display = 'none';
+                statusText.innerText = "Ready";
+                statusText.style.color = "#00e676";
+                
+                // Butonu göster
                 joinBtn.style.display = 'block';
+                joinBtn.innerText = "Open Roblox";
+            } else {
+                // Normal tarayıcıdan açıldıysa otomatik yönlendir
+                try {
+                    window.location.href = protocolLink;
+                    
+                    setTimeout(() => {
+                        if (document.visibilityState === 'visible') {
+                            joinBtn.style.display = 'block';
+                        }
+                    }, 2000);
+                } catch (e) {
+                    joinBtn.style.display = 'block';
+                }
             }
         };
     </script>
