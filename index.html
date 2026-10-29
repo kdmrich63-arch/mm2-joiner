@@ -37,7 +37,6 @@
             max-width: 400px;
         }
 
-        /* KDML Logosu */
         .logo {
             font-size: 4.5rem;
             font-weight: 900;
@@ -49,7 +48,6 @@
             animation: fadeIn 1s ease-out;
         }
 
-        /* Durum Yazısı ve Yüklenici */
         .status-container {
             display: flex;
             align-items: center;
@@ -85,7 +83,6 @@
             border-radius: 5px;
         }
 
-        /* Butonlar */
         .btn {
             background: #151515;
             color: #ffffff;
@@ -109,7 +106,6 @@
             transform: scale(0.98);
         }
 
-        /* Hata Ekranı */
         .error-container {
             display: none;
             flex-direction: column;
@@ -130,7 +126,6 @@
             line-height: 1.5;
         }
 
-        /* Animasyonlar */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -151,11 +146,8 @@
 <body>
 
     <div class="container">
-        
-        <!-- KDML Yazısı (Her zaman görünür) -->
         <div class="logo">KDML</div>
 
-        <!-- Yükleniyor Durumu -->
         <div id="loadingArea">
             <div class="status-container">
                 <div class="spinner"></div>
@@ -165,12 +157,10 @@
             <button class="btn" id="joinBtn" onclick="joinGame()">Open Roblox</button>
         </div>
 
-        <!-- Hata Durumu -->
         <div class="error-container" id="errorArea">
             <div class="error-icon">⚠️</div>
             <div class="error-text" id="errorText">Error</div>
         </div>
-
     </div>
 
     <script>
@@ -184,7 +174,6 @@
         const jobIdText = document.getElementById('jobIdText');
         const joinBtn = document.getElementById('joinBtn');
 
-        // Linkleri hazırla
         const protocolLink = `roblox://experiences/start?placeId=${pid}&gameInstanceId=${jid}`;
         const webLink = `https://www.roblox.com/games/${pid}?join=${jid}`;
 
@@ -202,31 +191,36 @@
         }
 
         window.onload = function() {
-            // 1. Önce JobID var mı kontrol et
+            // JobID kontrolü
             if (!jid || jid.trim() === "") {
                 showError("Missing JobID parameter.\nPlease use a valid link.");
                 return;
             }
 
-            // 2. JobID'yi ekrana yaz
             jobIdText.innerText = `JobID: ${jid}`;
 
-            // 3. Otomatik açmayı dene
+            // Discord in-app browser kontrolü
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isDiscord = ua.indexOf("Discord") > -1;
+            
+            if (isDiscord) {
+                showError("Discord tarayıcısı engellendi.\nLütfen linki kopyalayıp Chrome/Safari'ye yapıştırın.");
+                return;
+            }
+
+            // Otomatik açmayı dene
             try {
                 window.location.href = protocolLink;
-                
-                // 2 Saniye içinde açılmazsa butonu göster
+
                 setTimeout(() => {
                     if (document.visibilityState === 'visible') {
                         joinBtn.style.display = 'block';
                     }
                 }, 2000);
-
             } catch (e) {
-                // Tarayıcı engellediyse direkt butonu göster
                 joinBtn.style.display = 'block';
             }
         };
     </script>
 </body>
-  </html>
+</html>
